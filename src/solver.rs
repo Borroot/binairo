@@ -34,24 +34,32 @@ pub fn solves(puzzle: &puzzle::Puzzle, number: Option<usize>) -> Option<Vec<puzz
     constraint_balance(ctx, &solver, puzzle, shadow);
     constraint_uniqueness(ctx, &solver, puzzle, shadow);
 
-    // Compute
-    if solver.check() != z3::SatResult::Sat {
+    let mut solutions = Vec::new();
+
+    while (number == None || solutions.len() < number.unwrap()) && solver.check() == z3::SatResult::Sat {
+        // Extract the solution and add new rules to z3 to ensure solution uniqeness
+        let mut solution = puzzle::Puzzle::new(puzzle.width(), puzzle.height());
+        let mut compare = Vec::new();
+
+        let model = solver.get_model().unwrap();
+
+        for y in 0..puzzle.height() {
+            for x in 0..puzzle.width() {
+                let value = model.eval(shadow[y][x], true).unwrap().as_u64().unwrap();
+                solution[y][x] = Some(if value == 0 { false } else { true });
+                compare.push(shadow[y][x]._eq(&z3::ast::Int::from_u64(ctx, value)));
+            }
+        }
+        solutions.push(solution);
+
+        let compare = (0..compare.len()).map(|i| &compare[i]).collect::<Vec<_>>();
+        solver.assert(&z3::ast::Bool::and(ctx, &compare).not());
+    }
+
+    if solutions.len() == 0 {
         return None;
     }
-
-    // Extract the solution
-    let mut solution = puzzle::Puzzle::new(puzzle.width(), puzzle.height());
-    let model = solver.get_model().unwrap();
-
-    for y in 0..puzzle.height() {
-        for x in 0..puzzle.width() {
-            let value = model.eval(shadow[y][x], true).unwrap().as_i64().unwrap();
-            solution[y][x] = Some(if value == 0 { false } else { true });
-        }
-    }
-
-    // TODO return the number of solutions asked
-    return Some(vec![solution]);
+    return Some(solutions);
 }
 
 /// Initialize a 2d array with z3 objects.
@@ -76,13 +84,7 @@ fn constraint_numbers(
         for x in 0..puzzle.width() {
             // Some cells are according to the given puzzle a 0 or 1
             if let Some(value) = puzzle[y][x] {
-                solver.assert(&shadow[y][x]._eq(&z3::ast::Int::from_u64(
-                    ctx,
-                    match value {
-                        true => 1,
-                        false => 0,
-                    },
-                )))
+                solver.assert(&shadow[y][x]._eq(&z3::ast::Int::from_u64(ctx, value as u64)))
             } else {
                 // Every other cell is either a 0 or a 1
                 solver.assert(&z3::ast::Bool::or(
@@ -194,16 +196,24 @@ fn constraint_uniqueness(
             solver.assert(&z3::ast::Bool::or(ctx, cmp.as_slice()));
         }
     }
-
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    /// Test whether the uniqueness test works properly
+    #[test]
+    fn solve_uniqueness() {
+        assert!(!unique(&puzzle::Puzzle::from_codex("11c00i", 4, 4).unwrap()).unwrap());
+        assert!(!unique(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap()).unwrap());
+
+        assert!(unique(&puzzle::Puzzle::from_codex("11d111010d", 4, 4).unwrap()).unwrap());
+    }
+
     /// Test whether the uniqeness constraint is correctly applied
     #[test]
-    fn solve_unique() {
+    fn solve_constraint_unique() {
         // rows
         assert!(solve(&puzzle::Puzzle::from_codex("11d00h", 4, 4).unwrap()).is_none());
         assert!(solve(&puzzle::Puzzle::from_codex("h11d00", 4, 4).unwrap()).is_none());
@@ -214,5 +224,19 @@ mod tests {
         assert!(solve(&puzzle::Puzzle::from_codex("b1c1d0c0", 4, 4).unwrap()).is_none());
         assert!(solve(&puzzle::Puzzle::from_codex("1c1f0c0", 4, 4).unwrap()).is_none());
         assert!(solve(&puzzle::Puzzle::from_codex("a1c1e0c0", 4, 4).unwrap()).is_none());
+    }
+
+    /// Test whether multiple solutions are found correctly
+    #[test]
+    fn solve_more() {
+        assert!(solves(&puzzle::Puzzle::from_codex("11c00i", 4, 4).unwrap(), None).unwrap().len() == 2);
+
+        assert!(solves(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(), Some(0)).is_none());
+        assert!(solves(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(), None).unwrap().len() == 4);
+
+        assert!(solves(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(), Some(1)).unwrap().len() == 1);
+        assert!(solves(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(), Some(2)).unwrap().len() == 2);
+        assert!(solves(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(), Some(3)).unwrap().len() == 3);
+        assert!(solves(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(), Some(4)).unwrap().len() == 4);
     }
 }

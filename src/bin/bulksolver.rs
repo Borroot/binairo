@@ -1,14 +1,26 @@
 use binairo::{puzzle, solver};
+use std::fs;
 
 fn main() {
-    let binairo = puzzle::Puzzle::from_codex(
-        "b1k0b0a0b1c0a0a1f0e0d10b11g0f1c0d0h00g1c1b1a1a10b1c0c1b0f0a1b0g0b1o1b0c1g0b1d0a1e0a0a0",
-        14,
-        14,
-    )
-    .unwrap();
-    println!("{}", binairo);
+    for size in [6, 8, 10, 14, 20] {
+        for level in [1, 2] {
 
-    let solution = &solver::solve(&binairo).unwrap();
-    println!("{}", solution)
+            let filename = &format!("../../sets/sets2/size{}level{}.txt", size, level);
+
+            let contents = fs::read_to_string(filename).unwrap();
+            let codices = contents.split("\n").map(|codex| codex.trim()).collect::<Vec<_>>();
+
+            let mut text = String::new();
+
+            for codex in &codices {
+                let binairo = puzzle::Puzzle::from_codex(&codex, size, size).unwrap();
+                let solution = &solver::solve(&binairo).unwrap();
+
+                println!("{} {}", codex, solution.codex());
+                text.push_str(&format!("{} {}\n", codex, solution.codex()));
+            }
+
+            fs::write(filename, text);
+        }
+    }
 }

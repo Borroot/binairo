@@ -1,1 +1,2 @@
-pub mod binairo;
+pub mod puzzle;
+pub mod solver;

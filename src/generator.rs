@@ -1,7 +1,14 @@
-use rand::{self, Rng, SeedableRng};
 use crate::{puzzle, solver};
+use itertools::Itertools;
+use rand::{self, seq::SliceRandom, Rng, SeedableRng};
+use std::result;
 
-pub fn gen(width: usize, height: usize, seed: Option<u64>) -> puzzle::Puzzle {
+pub fn gen(
+    width: usize,
+    height: usize,
+    seed: Option<u64>,
+) -> result::Result<puzzle::Puzzle, String> {
+    // use the seed if given
     let mut rng = {
         if seed.is_none() {
             rand::rngs::SmallRng::from_rng(rand::thread_rng()).unwrap()
@@ -10,26 +17,58 @@ pub fn gen(width: usize, height: usize, seed: Option<u64>) -> puzzle::Puzzle {
         }
     };
 
-    let mut gen = puzzle::Puzzle::new(width, height);
+    // generate a puzzle
+    let mut gen = init(width, height, &mut rng)?;
+    eliminate(&mut gen, &mut rng);
+    // TODO make the puzzle easier using the human solver
 
-    for symbol in [false, false, true, true] {
-        let y = rng.gen_range(0..height);
-        let x = rng.gen_range(0..width);
-        gen[y][x] = Some(symbol);
+    return Ok(gen);
+}
+
+/// Generate a random solved puzzle of the given size.
+fn init(
+    width: usize,
+    height: usize,
+    rng: &mut rand::rngs::SmallRng,
+) -> result::Result<puzzle::Puzzle, String> {
+    let mut gen = puzzle::Puzzle::new(width, height)?;
+
+    // fill the puzzle with a few numbers
+    if width >= 4 && height >= 4 {
+        for symbol in [0, 0, 1, 1] {
+            let y = rng.gen_range(0..height);
+            let x = rng.gen_range(0..width);
+            gen[y][x] = Some(symbol);
+        }
+    } else {
+        // special case for 2xn puzzles, note that only 2x2 is valid
+        gen[0][0] = Some(rng.gen_range(0..=1));
     }
 
-    let mut gen = solver::solve(&gen).unwrap();
+    // solve the puzzle (it is always solvable)
+    gen = solver::solve(&gen).expect(&format!(
+        "It is not possible to generate a puzzle with width {} and height {}.",
+        width, height
+    ));
 
-    // todo sample this order
-    for y in 0..height {
-        for x in 0..width {
-            let symbol = gen[y][x];
-            gen[y][x] = None;
+    return Ok(gen);
+}
 
-            if solver::unique(&gen) != Some(true) {
-                gen[y][x] = symbol;
-            }
+/// Eliminate all the values which are not required for a unique solution
+fn eliminate(gen: &mut puzzle::Puzzle, mut rng: &mut rand::rngs::SmallRng) {
+    // shuffle the order in which all the cells are visited
+    let mut cells: Vec<_> = (0..gen.height())
+        .cartesian_product(0..gen.width())
+        .collect();
+    cells.shuffle(&mut rng);
+
+    // keep a value only if the solution is not unique upon removal
+    for (y, x) in cells {
+        let symbol = gen[y][x];
+        gen[y][x] = None;
+
+        if solver::unique(&gen) != Some(true) {
+            gen[y][x] = symbol;
         }
     }
-    return gen;
 }

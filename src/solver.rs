@@ -1,6 +1,55 @@
 use crate::puzzle;
 use z3::{self, ast::Ast};
 
+/// Give the number of solutions asked for
+pub fn solves(puzzle: &puzzle::Puzzle, number: Option<usize>) -> Option<Vec<puzzle::Puzzle>> {
+    // TODO split up this function
+
+    let ctx = &z3::Context::new(&z3::Config::default());
+    let solver = z3::Solver::new(ctx);
+
+    // Create a reference list with z3 objects corresponding to the puzzle cells
+    let shadow = &init(ctx, puzzle.width(), puzzle.height());
+    let shadow = &(0..puzzle.height()) // TODO beautify
+        .map(|y| (0..puzzle.width()).map(|x| &shadow[y][x]).collect())
+        .collect();
+
+    // Add all the constraints to the solver
+    constraint_numbers(ctx, &solver, puzzle, shadow);
+    constraint_consecutive(ctx, &solver, puzzle, shadow);
+    constraint_balance(ctx, &solver, puzzle, shadow);
+    constraint_uniqueness(ctx, &solver, puzzle, shadow);
+
+    let mut solutions = Vec::new();
+
+    while (number == None || solutions.len() < number.unwrap())
+        && solver.check() == z3::SatResult::Sat
+    {
+        // Extract the solution and add new rules to z3 to ensure solution uniqeness
+        let mut solution = puzzle::Puzzle::new(puzzle.width(), puzzle.height()).unwrap();
+        let mut compare = Vec::new();
+
+        let model = solver.get_model().unwrap();
+
+        for y in 0..puzzle.height() {
+            for x in 0..puzzle.width() {
+                let value = model.eval(shadow[y][x], true).unwrap().as_u64().unwrap();
+                solution[y][x] = Some(value.try_into().unwrap());
+                compare.push(shadow[y][x]._eq(&z3::ast::Int::from_u64(ctx, value)));
+            }
+        }
+        solutions.push(solution);
+
+        let compare = (0..compare.len()).map(|i| &compare[i]).collect::<Vec<_>>(); // TODO beautify
+        solver.assert(&z3::ast::Bool::and(ctx, &compare).not());
+    }
+
+    if solutions.len() == 0 {
+        return None;
+    }
+    return Some(solutions);
+}
+
 /// Checks whether the given puzzle has just one unique solution
 pub fn unique(puzzle: &puzzle::Puzzle) -> Option<bool> {
     match solves(puzzle, Some(2)) {
@@ -17,53 +66,9 @@ pub fn solve(puzzle: &puzzle::Puzzle) -> Option<puzzle::Puzzle> {
     }
 }
 
-/// Give the number of solutions asked for
-pub fn solves(puzzle: &puzzle::Puzzle, number: Option<usize>) -> Option<Vec<puzzle::Puzzle>> {
-    let ctx = &z3::Context::new(&z3::Config::default());
-    let solver = z3::Solver::new(ctx);
-
-    // Create a reference list with z3 objects corresponding to the puzzle cells
-    let shadow = &init(ctx, puzzle.width(), puzzle.height());
-    let shadow = &(0..puzzle.height())
-        .map(|y| (0..puzzle.width()).map(|x| &shadow[y][x]).collect())
-        .collect();
-
-    // Add all the constraints to the solver
-    constraint_numbers(ctx, &solver, puzzle, shadow);
-    constraint_consecutive(ctx, &solver, puzzle, shadow);
-    constraint_balance(ctx, &solver, puzzle, shadow);
-    constraint_uniqueness(ctx, &solver, puzzle, shadow);
-
-    let mut solutions = Vec::new();
-
-    while (number == None || solutions.len() < number.unwrap()) && solver.check() == z3::SatResult::Sat {
-        // Extract the solution and add new rules to z3 to ensure solution uniqeness
-        let mut solution = puzzle::Puzzle::new(puzzle.width(), puzzle.height());
-        let mut compare = Vec::new();
-
-        let model = solver.get_model().unwrap();
-
-        for y in 0..puzzle.height() {
-            for x in 0..puzzle.width() {
-                let value = model.eval(shadow[y][x], true).unwrap().as_u64().unwrap();
-                solution[y][x] = Some(if value == 0 { false } else { true });
-                compare.push(shadow[y][x]._eq(&z3::ast::Int::from_u64(ctx, value)));
-            }
-        }
-        solutions.push(solution);
-
-        let compare = (0..compare.len()).map(|i| &compare[i]).collect::<Vec<_>>();
-        solver.assert(&z3::ast::Bool::and(ctx, &compare).not());
-    }
-
-    if solutions.len() == 0 {
-        return None;
-    }
-    return Some(solutions);
-}
-
 /// Initialize a 2d array with z3 objects.
 fn init(ctx: &z3::Context, width: usize, height: usize) -> Vec<Vec<z3::ast::Int>> {
+    // TODO beautify
     (0..height)
         .map(|y| {
             (0..width)
@@ -107,36 +112,30 @@ fn constraint_consecutive(
     shadow: &Vec<Vec<&z3::ast::Int>>,
 ) {
     // No more than 2 consecutive 0's or 1's per row
-    if puzzle.width() >= 4 {
-        for y in 0..puzzle.height() {
-            for x in 0..puzzle.width() - 2 {
-                let sum =
-                    &z3::ast::Int::add(ctx, &[shadow[y][x], shadow[y][x + 1], shadow[y][x + 2]]);
-                solver.assert(&z3::ast::Bool::or(
-                    ctx,
-                    &[
-                        &sum._eq(&z3::ast::Int::from_i64(ctx, 1)),
-                        &sum._eq(&z3::ast::Int::from_i64(ctx, 2)),
-                    ],
-                ));
-            }
+    for y in 0..puzzle.height() {
+        for x in 0..puzzle.width() - 2 {
+            let sum = &z3::ast::Int::add(ctx, &[shadow[y][x], shadow[y][x + 1], shadow[y][x + 2]]);
+            solver.assert(&z3::ast::Bool::or(
+                ctx,
+                &[
+                    &sum._eq(&z3::ast::Int::from_i64(ctx, 1)),
+                    &sum._eq(&z3::ast::Int::from_i64(ctx, 2)),
+                ],
+            ));
         }
     }
 
     // No more than 2 consecutive 0's or 1's per column
-    if puzzle.height() >= 4 {
-        for x in 0..puzzle.width() {
-            for y in 0..puzzle.height() - 2 {
-                let sum =
-                    &z3::ast::Int::add(ctx, &[shadow[y][x], shadow[y + 1][x], shadow[y + 2][x]]);
-                solver.assert(&z3::ast::Bool::or(
-                    ctx,
-                    &[
-                        &sum._eq(&z3::ast::Int::from_i64(ctx, 1)),
-                        &sum._eq(&z3::ast::Int::from_i64(ctx, 2)),
-                    ],
-                ));
-            }
+    for x in 0..puzzle.width() {
+        for y in 0..puzzle.height() - 2 {
+            let sum = &z3::ast::Int::add(ctx, &[shadow[y][x], shadow[y + 1][x], shadow[y + 2][x]]);
+            solver.assert(&z3::ast::Bool::or(
+                ctx,
+                &[
+                    &sum._eq(&z3::ast::Int::from_i64(ctx, 1)),
+                    &sum._eq(&z3::ast::Int::from_i64(ctx, 2)),
+                ],
+            ));
         }
     }
 }
@@ -152,7 +151,7 @@ fn constraint_balance(
     for y in 0..puzzle.height() {
         solver.assert(
             &z3::ast::Int::add(ctx, shadow[y].as_slice())
-                ._eq(&z3::ast::Int::from_u64(ctx, puzzle.height() as u64 / 2)),
+                ._eq(&z3::ast::Int::from_u64(ctx, puzzle.width() as u64 / 2)),
         );
     }
 
@@ -181,7 +180,7 @@ fn constraint_uniqueness(
             let cmp = (0..puzzle.width())
                 .map(|x| shadow[y1][x]._eq(&shadow[y2][x]).not())
                 .collect::<Vec<_>>();
-            let cmp = (0..puzzle.width()).map(|i| &cmp[i]).collect::<Vec<_>>();
+            let cmp = (0..puzzle.width()).map(|i| &cmp[i]).collect::<Vec<_>>(); // TODO beautify
             solver.assert(&z3::ast::Bool::or(ctx, cmp.as_slice()));
         }
     }
@@ -192,7 +191,7 @@ fn constraint_uniqueness(
             let cmp = (0..puzzle.height())
                 .map(|y| shadow[y][x1]._eq(&shadow[y][x2]).not())
                 .collect::<Vec<_>>();
-            let cmp = (0..puzzle.height()).map(|i| &cmp[i]).collect::<Vec<_>>();
+            let cmp = (0..puzzle.height()).map(|i| &cmp[i]).collect::<Vec<_>>(); // TODO beautify
             solver.assert(&z3::ast::Bool::or(ctx, cmp.as_slice()));
         }
     }
@@ -229,14 +228,23 @@ mod tests {
     /// Test whether multiple solutions are found correctly
     #[test]
     fn solve_more() {
-        assert!(solves(&puzzle::Puzzle::from_codex("11c00i", 4, 4).unwrap(), None).unwrap().len() == 2);
+        let solutions = |codex: &str, number: Option<usize>| -> usize {
+            let p = &puzzle::Puzzle::from_codex(codex, 4, 4).unwrap();
+            solves(p, number).unwrap().len()
+        };
 
-        assert!(solves(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(), Some(0)).is_none());
-        assert!(solves(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(), None).unwrap().len() == 4);
+        assert!(solves(
+            &puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(),
+            Some(0)
+        )
+        .is_none());
 
-        assert!(solves(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(), Some(1)).unwrap().len() == 1);
-        assert!(solves(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(), Some(2)).unwrap().len() == 2);
-        assert!(solves(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(), Some(3)).unwrap().len() == 3);
-        assert!(solves(&puzzle::Puzzle::from_codex("11d11h", 4, 4).unwrap(), Some(4)).unwrap().len() == 4);
+        assert!(solutions("11c00i", None) == 2);
+        assert!(solutions("11d11h", None) == 4);
+
+        assert!(solutions("11d11h", Some(1)) == 1);
+        assert!(solutions("11d11h", Some(2)) == 2);
+        assert!(solutions("11d11h", Some(3)) == 3);
+        assert!(solutions("11d11h", Some(4)) == 4);
     }
 }

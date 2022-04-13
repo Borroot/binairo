@@ -34,15 +34,10 @@ fn init(
     let mut gen = puzzle::Puzzle::new(width, height)?;
 
     // fill the puzzle with a few numbers
-    if width >= 4 && height >= 4 {
-        for symbol in [0, 0, 1, 1] {
-            let y = rng.gen_range(0..height);
-            let x = rng.gen_range(0..width);
-            gen[y][x] = Some(symbol);
-        }
-    } else {
-        // special case for 2xn puzzles, note that only 2x2 is valid
-        gen[0][0] = Some(rng.gen_range(0..=1));
+    for symbol in [0, 0, 1, 1] {
+        let y = rng.gen_range(0..height);
+        let x = rng.gen_range(0..width);
+        gen[y][x] = Some(symbol);
     }
 
     // solve the puzzle (it is always solvable)
@@ -67,6 +62,8 @@ fn eliminate(gen: &mut puzzle::Puzzle, mut rng: &mut rand::rngs::SmallRng) {
         let symbol = gen[y][x];
         gen[y][x] = None;
 
+        // TODO dont run the unique function but just check if there is not
+        // other solution than the one we started with (more efficient)
         if solver::unique(&gen) != Some(true) {
             gen[y][x] = symbol;
         }

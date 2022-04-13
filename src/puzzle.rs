@@ -80,8 +80,8 @@ impl Puzzle {
         if width % 2 != 0 || height % 2 != 0 {
             return Err("Width and height have to be a multiple of two.".to_string());
         }
-        if width == 0 || height == 0 {
-            return Err("Width and height have to be bigger than zero.".to_string());
+        if width < 4 || height < 4 {
+            return Err("Width and height have to be at least four.".to_string());
         }
         return Ok(());
     }

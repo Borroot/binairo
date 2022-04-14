@@ -1,4 +1,4 @@
-use crate::analyzer::tactics::{self, Tactic};
+use crate::analyzer::tactics::{hint, Tactic};
 use crate::puzzle;
 
 /// Tactic applied when a line has all the 0's or 1's already, fill the rest
@@ -6,7 +6,7 @@ use crate::puzzle;
 struct CountFixed;
 
 impl Tactic for CountFixed {
-    fn hints(puzzle: &puzzle::Puzzle) -> Vec<tactics::Hint> {
+    fn hints(puzzle: &puzzle::Puzzle) -> Vec<hint::Hint> {
         let mut hints = Vec::new();
 
         // check horizontal lines
@@ -25,7 +25,7 @@ impl Tactic for CountFixed {
                 if count[symbol] == puzzle.width() / 2 && count[symbol ^ 1] != puzzle.width() / 2 {
                     for x in 0..puzzle.width() {
                         if puzzle[y][x].is_none() {
-                            hints.push(tactics::Hint::new(x, y, (symbol ^ 1).try_into().unwrap()));
+                            hints.push(hint::Hint::new(x, y, (symbol ^ 1).try_into().unwrap()));
                         }
                     }
                 }
@@ -49,7 +49,7 @@ impl Tactic for CountFixed {
                 {
                     for y in 0..puzzle.height() {
                         if puzzle[y][x].is_none() {
-                            let hint = tactics::Hint::new(x, y, (symbol ^ 1).try_into().unwrap());
+                            let hint = hint::Hint::new(x, y, (symbol ^ 1).try_into().unwrap());
                             if !hints.contains(&hint) {
                                 hints.push(hint);
                             }
@@ -73,16 +73,16 @@ mod tests {
         assert!(
             CountFixed::hints(&puzzle1)
                 == vec![
-                    tactics::Hint::new(2, 0, 0),
-                    tactics::Hint::new(3, 0, 0),
-                    tactics::Hint::new(0, 1, 0),
-                    tactics::Hint::new(3, 1, 0),
-                    tactics::Hint::new(1, 2, 0),
-                    tactics::Hint::new(2, 2, 0),
-                    tactics::Hint::new(0, 3, 0),
-                    tactics::Hint::new(2, 3, 0),
-                    tactics::Hint::new(0, 4, 0),
-                    tactics::Hint::new(1, 5, 0),
+                    hint::Hint::new(2, 0, 0),
+                    hint::Hint::new(3, 0, 0),
+                    hint::Hint::new(0, 1, 0),
+                    hint::Hint::new(3, 1, 0),
+                    hint::Hint::new(1, 2, 0),
+                    hint::Hint::new(2, 2, 0),
+                    hint::Hint::new(0, 3, 0),
+                    hint::Hint::new(2, 3, 0),
+                    hint::Hint::new(0, 4, 0),
+                    hint::Hint::new(1, 5, 0),
                 ]
         );
 
@@ -90,16 +90,16 @@ mod tests {
         assert!(
             CountFixed::hints(&puzzle2)
                 == vec![
-                    tactics::Hint::new(2, 0, 1),
-                    tactics::Hint::new(3, 0, 1),
-                    tactics::Hint::new(0, 1, 1),
-                    tactics::Hint::new(3, 1, 1),
-                    tactics::Hint::new(1, 2, 1),
-                    tactics::Hint::new(2, 2, 1),
-                    tactics::Hint::new(0, 3, 1),
-                    tactics::Hint::new(2, 3, 1),
-                    tactics::Hint::new(0, 4, 1),
-                    tactics::Hint::new(1, 5, 1),
+                    hint::Hint::new(2, 0, 1),
+                    hint::Hint::new(3, 0, 1),
+                    hint::Hint::new(0, 1, 1),
+                    hint::Hint::new(3, 1, 1),
+                    hint::Hint::new(1, 2, 1),
+                    hint::Hint::new(2, 2, 1),
+                    hint::Hint::new(0, 3, 1),
+                    hint::Hint::new(2, 3, 1),
+                    hint::Hint::new(0, 4, 1),
+                    hint::Hint::new(1, 5, 1),
                 ]
         );
     }
@@ -110,16 +110,16 @@ mod tests {
         assert!(
             CountFixed::hints(&puzzle1)
                 == vec![
-                    tactics::Hint::new(0, 0, 0),
-                    tactics::Hint::new(0, 1, 0),
-                    tactics::Hint::new(1, 0, 0),
-                    tactics::Hint::new(1, 3, 0),
-                    tactics::Hint::new(2, 1, 0),
-                    tactics::Hint::new(2, 2, 0),
-                    tactics::Hint::new(3, 1, 0),
-                    tactics::Hint::new(3, 3, 0),
-                    tactics::Hint::new(4, 3, 0),
-                    tactics::Hint::new(5, 2, 0),
+                    hint::Hint::new(0, 0, 0),
+                    hint::Hint::new(0, 1, 0),
+                    hint::Hint::new(1, 0, 0),
+                    hint::Hint::new(1, 3, 0),
+                    hint::Hint::new(2, 1, 0),
+                    hint::Hint::new(2, 2, 0),
+                    hint::Hint::new(3, 1, 0),
+                    hint::Hint::new(3, 3, 0),
+                    hint::Hint::new(4, 3, 0),
+                    hint::Hint::new(5, 2, 0),
                 ]
         );
 
@@ -127,16 +127,16 @@ mod tests {
         assert!(
             CountFixed::hints(&puzzle2)
                 == vec![
-                    tactics::Hint::new(0, 0, 1),
-                    tactics::Hint::new(0, 1, 1),
-                    tactics::Hint::new(1, 0, 1),
-                    tactics::Hint::new(1, 3, 1),
-                    tactics::Hint::new(2, 1, 1),
-                    tactics::Hint::new(2, 2, 1),
-                    tactics::Hint::new(3, 1, 1),
-                    tactics::Hint::new(3, 3, 1),
-                    tactics::Hint::new(4, 3, 1),
-                    tactics::Hint::new(5, 2, 1),
+                    hint::Hint::new(0, 0, 1),
+                    hint::Hint::new(0, 1, 1),
+                    hint::Hint::new(1, 0, 1),
+                    hint::Hint::new(1, 3, 1),
+                    hint::Hint::new(2, 1, 1),
+                    hint::Hint::new(2, 2, 1),
+                    hint::Hint::new(3, 1, 1),
+                    hint::Hint::new(3, 3, 1),
+                    hint::Hint::new(4, 3, 1),
+                    hint::Hint::new(5, 2, 1),
                 ]
         );
     }

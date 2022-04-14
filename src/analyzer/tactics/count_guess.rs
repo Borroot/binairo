@@ -1,4 +1,4 @@
-use crate::analyzer::tactics::{self, Tactic};
+use crate::analyzer::tactics::{hint, Tactic};
 use crate::puzzle;
 
 /// Advanced tactic which uses backtracking on one line. Guess a value, if no
@@ -6,7 +6,7 @@ use crate::puzzle;
 struct CountGuess;
 
 impl Tactic for CountGuess {
-    fn hints(puzzle: &puzzle::Puzzle) -> Vec<tactics::Hint> {
+    fn hints(puzzle: &puzzle::Puzzle) -> Vec<hint::Hint> {
         let mut hints = Vec::new();
 
         for y in 0..puzzle.height() {
@@ -19,7 +19,7 @@ impl Tactic for CountGuess {
 
                         // check horizontal line
                         if !backtrack(&mut line, None) {
-                            hints.push(tactics::Hint::new(x, y, guess ^ 1));
+                            hints.push(hint::Hint::new(x, y, guess ^ 1));
                             continue 'next_cell;
                         }
 
@@ -29,7 +29,7 @@ impl Tactic for CountGuess {
 
                         // check vertical line
                         if !backtrack(&mut line, None) {
-                            hints.push(tactics::Hint::new(x, y, guess ^ 1));
+                            hints.push(hint::Hint::new(x, y, guess ^ 1));
                             continue 'next_cell;
                         }
                     }
@@ -113,14 +113,14 @@ mod tests {
         assert!(
             CountGuess::hints(&puzzle)
                 == vec![
-                    tactics::Hint::new(2, 0, 0),
-                    tactics::Hint::new(3, 0, 0),
-                    tactics::Hint::new(4, 0, 1),
-                    tactics::Hint::new(5, 0, 0),
-                    tactics::Hint::new(6, 0, 0),
-                    tactics::Hint::new(2, 1, 1),
-                    tactics::Hint::new(4, 1, 1),
-                    tactics::Hint::new(7, 1, 1),
+                    hint::Hint::new(2, 0, 0),
+                    hint::Hint::new(3, 0, 0),
+                    hint::Hint::new(4, 0, 1),
+                    hint::Hint::new(5, 0, 0),
+                    hint::Hint::new(6, 0, 0),
+                    hint::Hint::new(2, 1, 1),
+                    hint::Hint::new(4, 1, 1),
+                    hint::Hint::new(7, 1, 1),
                 ]
         )
     }
@@ -131,14 +131,14 @@ mod tests {
         assert!(
             CountGuess::hints(&puzzle)
                 == vec![
-                    tactics::Hint::new(4, 2, 1),
-                    tactics::Hint::new(5, 2, 0),
-                    tactics::Hint::new(5, 3, 0),
-                    tactics::Hint::new(4, 4, 1),
-                    tactics::Hint::new(5, 4, 1),
-                    tactics::Hint::new(5, 5, 0),
-                    tactics::Hint::new(5, 6, 0),
-                    tactics::Hint::new(4, 7, 1),
+                    hint::Hint::new(4, 2, 1),
+                    hint::Hint::new(5, 2, 0),
+                    hint::Hint::new(5, 3, 0),
+                    hint::Hint::new(4, 4, 1),
+                    hint::Hint::new(5, 4, 1),
+                    hint::Hint::new(5, 5, 0),
+                    hint::Hint::new(5, 6, 0),
+                    hint::Hint::new(4, 7, 1),
                 ]
         )
     }
@@ -149,9 +149,9 @@ mod tests {
         assert!(
             CountGuess::hints(&puzzle)
                 == vec![
-                    tactics::Hint::new(1, 0, 1),
-                    tactics::Hint::new(1, 1, 1),
-                    tactics::Hint::new(3, 1, 1),
+                    hint::Hint::new(1, 0, 1),
+                    hint::Hint::new(1, 1, 1),
+                    hint::Hint::new(3, 1, 1),
                 ]
         )
     }

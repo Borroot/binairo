@@ -3,6 +3,7 @@ use itertools::Itertools;
 use rand::{self, seq::SliceRandom, Rng, SeedableRng};
 use std::result;
 
+/// Generate a puzzle with the given sizes and from the given seed, if any.
 pub fn gen(
     width: usize,
     height: usize,
@@ -20,7 +21,7 @@ pub fn gen(
     // generate a puzzle
     let mut gen = init(width, height, &mut rng)?;
     eliminate(&mut gen, &mut rng);
-    // TODO make the puzzle easier using the human solver
+    // TODO make the puzzle easier using the analyzer
 
     return Ok(gen);
 }
@@ -49,7 +50,7 @@ fn init(
     return Ok(gen);
 }
 
-/// Eliminate all the values which are not required for a unique solution
+/// Eliminate all the values which are not required for a unique solution.
 fn eliminate(gen: &mut puzzle::Puzzle, mut rng: &mut rand::rngs::SmallRng) {
     // shuffle the order in which all the cells are visited
     let mut cells: Vec<_> = (0..gen.height())

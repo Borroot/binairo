@@ -4,6 +4,7 @@ use std::{char, fmt, ops, result};
 pub struct Puzzle(Vec<Vec<Option<u8>>>);
 
 impl Puzzle {
+    /// Create a new empty puzzle with the given sizes.
     pub fn new(width: usize, height: usize) -> result::Result<Puzzle, String> {
         Self::check(width, height)?;
         return Ok(Puzzle(vec![vec![None; width]; height]));
@@ -17,7 +18,18 @@ impl Puzzle {
         self.0.len()
     }
 
-    /// Return the codex representation of this puzzle
+    /// Check whether the width and height big enough and a multiple of two.
+    fn check(width: usize, height: usize) -> result::Result<(), String> {
+        if width % 2 != 0 || height % 2 != 0 {
+            return Err("Width and height have to be a multiple of two.".to_string());
+        }
+        if width < 4 || height < 4 {
+            return Err("Width and height have to be at least four.".to_string());
+        }
+        return Ok(());
+    }
+
+    /// Return the codex representation of this puzzle.
     pub fn codex(&self) -> String {
         let mut codex = String::new();
         let mut count = 0;
@@ -45,7 +57,7 @@ impl Puzzle {
         return codex;
     }
 
-    /// Create a new puzzle from a codex string
+    /// Create a new puzzle from a codex string.
     pub fn from_codex(codex: &str, width: usize, height: usize) -> result::Result<Puzzle, String> {
         Self::check(width, height)?;
 
@@ -74,16 +86,6 @@ impl Puzzle {
         }
 
         return Ok(puzzle);
-    }
-
-    fn check(width: usize, height: usize) -> result::Result<(), String> {
-        if width % 2 != 0 || height % 2 != 0 {
-            return Err("Width and height have to be a multiple of two.".to_string());
-        }
-        if width < 4 || height < 4 {
-            return Err("Width and height have to be at least four.".to_string());
-        }
-        return Ok(());
     }
 }
 

@@ -7,12 +7,100 @@ struct CountGuess;
 
 impl Tactic for CountGuess {
     fn hints(puzzle: &puzzle::Puzzle) -> Vec<tactics::Hint> {
-        let hints = Vec::new();
+        let mut hints = Vec::new();
 
-        // TODO
+        for y in 0..puzzle.height() {
+            'next_cell: for x in 0..puzzle.width() {
+                if puzzle[y][x].is_none() {
+                    for guess in [0, 1] {
+                        // create the horizontal line
+                        let mut line = puzzle[y].clone();
+                        line[x] = Some(guess);
 
+                        // check horizontal line
+                        if !backtrack(&mut line, None) {
+                            hints.push(tactics::Hint::new(x, y, guess ^ 1));
+                            continue 'next_cell;
+                        }
+
+                        // create the vertical line
+                        let mut line: Vec<_> = (0..puzzle.height()).map(|y| puzzle[y][x]).collect();
+                        line[y] = Some(guess);
+
+                        // check vertical line
+                        if !backtrack(&mut line, None) {
+                            hints.push(tactics::Hint::new(x, y, guess ^ 1));
+                            continue 'next_cell;
+                        }
+                    }
+                }
+            }
+        }
         return hints;
     }
+}
+
+/// Backtrack on the given line and return whether a valid state exists or not.
+fn backtrack(line: &mut Vec<Option<u8>>, last: Option<usize>) -> bool {
+    if last.is_some() && !valid(line, last.unwrap()) {
+        return false; // the line is invalid
+    }
+
+    if line.iter().all(|v| v.is_some()) {
+        return true; // the line is valid and completely filled
+    }
+
+    for i in 0..line.len() {
+        if line[i].is_none() {
+            for guess in [0, 1] {
+                line[i] = Some(guess);
+
+                if backtrack(line, Some(i)) {
+                    return true;
+                }
+
+                line[i] = None;
+            }
+        }
+    }
+
+    return false; // no valid state was found
+}
+
+/// Check whether a given row is still valid given the last changed index.
+fn valid(line: &Vec<Option<u8>>, last: usize) -> bool {
+    // check [. . last]
+    if last > 1 && line[last] == line[last - 1] && line[last] == line[last - 2] {
+        return false;
+    }
+
+    // check [last . .]
+    if last < line.len() - 2 && line[last] == line[last + 1] && line[last] == line[last + 2] {
+        return false;
+    }
+
+    // check [. last .]
+    if last > 0
+        && last < line.len() - 1
+        && line[last] == line[last - 1]
+        && line[last] == line[last + 1]
+    {
+        return false;
+    }
+
+    // check counts
+    let mut count: [usize; 2] = [0, 0];
+    for i in 0..line.len() {
+        if let Some(symbol) = line[i] {
+            count[symbol as usize] += 1;
+        }
+    }
+    if count[0] > line.len() / 2 || count[1] > line.len() / 2 {
+        return false;
+    }
+
+    // everything is valid
+    return true;
 }
 
 #[cfg(test)]
@@ -20,8 +108,51 @@ mod tests {
     use super::*;
 
     #[test]
-    fn count_guess_horizontal() {}
+    fn count_guess_horizontal() {
+        let puzzle = puzzle::Puzzle::from_codex("11e100a0dhhhh", 8, 6).unwrap();
+        assert!(
+            CountGuess::hints(&puzzle)
+                == vec![
+                    tactics::Hint::new(2, 0, 0),
+                    tactics::Hint::new(3, 0, 0),
+                    tactics::Hint::new(4, 0, 1),
+                    tactics::Hint::new(5, 0, 0),
+                    tactics::Hint::new(6, 0, 0),
+                    tactics::Hint::new(2, 1, 1),
+                    tactics::Hint::new(4, 1, 1),
+                    tactics::Hint::new(7, 1, 1),
+                ]
+        )
+    }
 
     #[test]
-    fn count_guess_vertical() {}
+    fn count_guess_vertical() {
+        let puzzle = puzzle::Puzzle::from_codex("d01d01fd0afffe1", 6, 8).unwrap();
+        assert!(
+            CountGuess::hints(&puzzle)
+                == vec![
+                    tactics::Hint::new(4, 2, 1),
+                    tactics::Hint::new(5, 2, 0),
+                    tactics::Hint::new(5, 3, 0),
+                    tactics::Hint::new(4, 4, 1),
+                    tactics::Hint::new(5, 4, 1),
+                    tactics::Hint::new(5, 5, 0),
+                    tactics::Hint::new(5, 6, 0),
+                    tactics::Hint::new(4, 7, 1),
+                ]
+        )
+    }
+
+    #[test]
+    fn count_guess_noduplicates() {
+        let puzzle = puzzle::Puzzle::from_codex("d0a0b0c0b", 4, 4).unwrap();
+        assert!(
+            CountGuess::hints(&puzzle)
+                == vec![
+                    tactics::Hint::new(1, 0, 1),
+                    tactics::Hint::new(1, 1, 1),
+                    tactics::Hint::new(3, 1, 1),
+                ]
+        )
+    }
 }

@@ -3,10 +3,11 @@ use crate::puzzle;
 
 /// Advanced tactic which uses backtracking on one line. Guess a value, if no
 /// valid line can follow we know the guessed value should be the opposite.
-struct CountGuess;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CountGuess;
 
 impl Tactic for CountGuess {
-    fn hints(puzzle: &puzzle::Puzzle) -> Vec<hint::Hint> {
+    fn hints(&self, puzzle: &puzzle::Puzzle) -> Vec<hint::Hint> {
         let mut hints = Vec::new();
 
         for y in 0..puzzle.height() {
@@ -111,7 +112,7 @@ mod tests {
     fn count_guess_horizontal() {
         let puzzle = puzzle::Puzzle::from_codex("11e100a0dhhhh", 8, 6).unwrap();
         assert!(
-            CountGuess::hints(&puzzle)
+            CountGuess.hints(&puzzle)
                 == vec![
                     hint::Hint::new(2, 0, 0),
                     hint::Hint::new(3, 0, 0),
@@ -129,7 +130,7 @@ mod tests {
     fn count_guess_vertical() {
         let puzzle = puzzle::Puzzle::from_codex("d01d01fd0afffe1", 6, 8).unwrap();
         assert!(
-            CountGuess::hints(&puzzle)
+            CountGuess.hints(&puzzle)
                 == vec![
                     hint::Hint::new(4, 2, 1),
                     hint::Hint::new(5, 2, 0),
@@ -147,7 +148,7 @@ mod tests {
     fn count_guess_noduplicates() {
         let puzzle = puzzle::Puzzle::from_codex("d0a0b0c0b", 4, 4).unwrap();
         assert!(
-            CountGuess::hints(&puzzle)
+            CountGuess.hints(&puzzle)
                 == vec![
                     hint::Hint::new(1, 0, 1),
                     hint::Hint::new(1, 1, 1),

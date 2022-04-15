@@ -3,10 +3,11 @@ use crate::puzzle;
 
 /// Tactic applied when seen two consecutive same numbers, with a gap in
 /// between. E.g. 0_0 becomes 010.
-struct Row3;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Row3;
 
 impl Tactic for Row3 {
-    fn hints(puzzle: &puzzle::Puzzle) -> Vec<hint::Hint> {
+    fn hints(&self, puzzle: &puzzle::Puzzle) -> Vec<hint::Hint> {
         let mut hints = Vec::new();
 
         // check horizontal lines
@@ -47,12 +48,12 @@ mod tests {
     #[test]
     fn row3_horizontal() {
         let puzzle = puzzle::Puzzle::from_codex("1a1j0a0", 4, 4).unwrap();
-        assert!(Row3::hints(&puzzle) == vec![hint::Hint::new(1, 0, 0), hint::Hint::new(2, 3, 1),]);
+        assert!(Row3.hints(&puzzle) == vec![hint::Hint::new(1, 0, 0), hint::Hint::new(2, 3, 1),]);
     }
 
     #[test]
     fn row3_vertical() {
         let puzzle = puzzle::Puzzle::from_codex("1f01f0", 4, 4).unwrap();
-        assert!(Row3::hints(&puzzle) == vec![hint::Hint::new(0, 1, 0), hint::Hint::new(3, 2, 1),]);
+        assert!(Row3.hints(&puzzle) == vec![hint::Hint::new(0, 1, 0), hint::Hint::new(3, 2, 1),]);
     }
 }

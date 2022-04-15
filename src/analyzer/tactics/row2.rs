@@ -3,10 +3,11 @@ use crate::puzzle;
 
 /// Tactic applied when seen two consecutive same numbers, put the other number
 /// at both sides of these consecutives. E.g. _00_ becomes 1001.
-struct Row2;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Row2;
 
 impl Tactic for Row2 {
-    fn hints(puzzle: &puzzle::Puzzle) -> Vec<hint::Hint> {
+    fn hints(&self, puzzle: &puzzle::Puzzle) -> Vec<hint::Hint> {
         let mut hints = Vec::new();
 
         // check horizontal lines
@@ -59,7 +60,7 @@ mod tests {
     fn row2_horizontal() {
         let puzzle = puzzle::Puzzle::from_codex("11c00cd11", 4, 4).unwrap();
         assert!(
-            Row2::hints(&puzzle)
+            Row2.hints(&puzzle)
                 == vec![
                     hint::Hint::new(2, 0, 0),
                     hint::Hint::new(0, 1, 1),
@@ -73,7 +74,7 @@ mod tests {
     fn row2_vertical() {
         let puzzle = puzzle::Puzzle::from_codex("c1a0a110b1c", 4, 4).unwrap();
         assert!(
-            Row2::hints(&puzzle)
+            Row2.hints(&puzzle)
                 == vec![
                     hint::Hint::new(0, 1, 0),
                     hint::Hint::new(1, 0, 1),

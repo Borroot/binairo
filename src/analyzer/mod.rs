@@ -5,24 +5,25 @@ use crate::{
 use std::result;
 use strum::IntoEnumIterator;
 
-mod tactics;
+pub mod tactics;
 
-// TODO add a difficulty measure function based on the stats
+// TODO create a difficulty measure based on the stats
 
 #[derive(Debug, PartialEq, Eq)]
-struct Counter {
-    tactic: tactics::Tactics,
-    count: usize,
+pub struct Counter {
+    pub tactic: tactics::Tactics,
+    pub count: usize,
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Stats {
-    counters: Vec<Counter>,
-    unsolved: puzzle::Puzzle,
-    solved: puzzle::Puzzle,
+    pub counters: Vec<Counter>,
+    pub unsolved: puzzle::Puzzle,
+    pub solved: puzzle::Puzzle,
 }
 
 impl Stats {
+    // TODO pass tactics as a reference
     pub fn from(puzzle: &puzzle::Puzzle, tactics: Option<Vec<tactics::Tactics>>) -> Stats {
         // initialize the list of tactics and sort
         let mut tactics = if tactics.is_none() || tactics.as_ref().unwrap().len() == 0 {
@@ -217,12 +218,7 @@ mod tests {
                         },
                     ],
                     unsolved: puzzle.clone(),
-                    solved: puzzle::Puzzle::from_codex(
-                        "110010001b1110100fff",
-                        6,
-                        6
-                    )
-                    .unwrap(),
+                    solved: puzzle::Puzzle::from_codex("110010001b1110100fff", 6, 6).unwrap(),
                 }
         );
     }

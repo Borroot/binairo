@@ -18,6 +18,10 @@ impl Puzzle {
         self.0.len()
     }
 
+    pub fn isfull(&self) -> bool {
+        self.0.iter().all(|line| line.iter().all(|v| v.is_some()))
+    }
+
     /// Check whether the width and height big enough and a multiple of two.
     fn check(width: usize, height: usize) -> result::Result<(), String> {
         if width % 2 != 0 || height % 2 != 0 {
@@ -197,5 +201,13 @@ mod tests {
 
         assert!(Puzzle::from_codex("l", 3, 4).is_err());
         assert!(Puzzle::from_codex("l", 4, 3).is_err());
+    }
+
+    #[test]
+    fn full() {
+        assert!(!Puzzle::new(4, 4).unwrap().isfull());
+        assert!(Puzzle::from_codex("1111000011110000", 4, 4)
+            .unwrap()
+            .isfull());
     }
 }

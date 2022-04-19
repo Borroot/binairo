@@ -69,7 +69,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn count_fixed_horizontal() {
+    fn horizontal() {
         let puzzle1 = puzzle::Puzzle::from_codex("11c11a1b1a1a1a0111a10h", 4, 8).unwrap();
         assert!(
             CountFixed.hints(&puzzle1)
@@ -106,7 +106,7 @@ mod tests {
     }
 
     #[test]
-    fn count_fixed_vertical() {
+    fn vertical() {
         let puzzle1 = puzzle::Puzzle::from_codex("b1110c1b11b11a10c1a1b1b", 8, 4).unwrap();
         assert!(
             CountFixed.hints(&puzzle1)

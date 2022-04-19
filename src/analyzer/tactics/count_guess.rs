@@ -109,7 +109,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn count_guess_horizontal() {
+    fn horizontal() {
         let puzzle = puzzle::Puzzle::from_codex("11e100a0dhhhh", 8, 6).unwrap();
         assert!(
             CountGuess.hints(&puzzle)
@@ -127,7 +127,7 @@ mod tests {
     }
 
     #[test]
-    fn count_guess_vertical() {
+    fn vertical() {
         let puzzle = puzzle::Puzzle::from_codex("d01d01fd0afffe1", 6, 8).unwrap();
         assert!(
             CountGuess.hints(&puzzle)
@@ -145,7 +145,7 @@ mod tests {
     }
 
     #[test]
-    fn count_guess_noduplicates() {
+    fn noduplicates() {
         let puzzle = puzzle::Puzzle::from_codex("d0a0b0c0b", 4, 4).unwrap();
         assert!(
             CountGuess.hints(&puzzle)

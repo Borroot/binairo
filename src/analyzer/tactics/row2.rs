@@ -57,7 +57,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn row2_horizontal() {
+    fn horizontal() {
         let puzzle = puzzle::Puzzle::from_codex("11c00cd11", 4, 4).unwrap();
         assert!(
             Row2.hints(&puzzle)
@@ -71,7 +71,7 @@ mod tests {
     }
 
     #[test]
-    fn row2_vertical() {
+    fn vertical() {
         let puzzle = puzzle::Puzzle::from_codex("c1a0a110b1c", 4, 4).unwrap();
         assert!(
             Row2.hints(&puzzle)

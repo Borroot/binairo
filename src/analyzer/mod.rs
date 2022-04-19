@@ -3,7 +3,7 @@ use crate::{
     puzzle,
 };
 use std::result;
-use strum::{IntoEnumIterator};
+use strum::IntoEnumIterator;
 
 mod tactics;
 

@@ -46,13 +46,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn row3_horizontal() {
+    fn horizontal() {
         let puzzle = puzzle::Puzzle::from_codex("1a1j0a0", 4, 4).unwrap();
         assert!(Row3.hints(&puzzle) == vec![hint::Hint::new(1, 0, 0), hint::Hint::new(2, 3, 1),]);
     }
 
     #[test]
-    fn row3_vertical() {
+    fn vertical() {
         let puzzle = puzzle::Puzzle::from_codex("1f01f0", 4, 4).unwrap();
         assert!(Row3.hints(&puzzle) == vec![hint::Hint::new(0, 1, 0), hint::Hint::new(3, 2, 1),]);
     }

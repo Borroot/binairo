@@ -5,6 +5,7 @@ mod count_fixed;
 mod count_guess;
 mod row2;
 mod row3;
+mod uniqueness;
 
 pub mod hint;
 
@@ -25,7 +26,7 @@ pub enum Tactics {
     Row3,
     CountFixed,
     CountGuess,
-    // Uniqueness, // TODO
+    Uniqueness,
     // Backtrack,  // TODO
 }
 
@@ -40,7 +41,7 @@ impl Tactic for Tactics {
             Tactics::Row3 => row3::Row3.hints(puzzle),
             Tactics::CountFixed => count_fixed::CountFixed.hints(puzzle),
             Tactics::CountGuess => count_guess::CountGuess.hints(puzzle),
-            // Tactics::Uniqueness => uniqueness::Uniqueness.hints(puzzle), // TODO
+            Tactics::Uniqueness => uniqueness::Uniqueness.hints(puzzle),
             // Tactics::Backtrack => backtrack::Backtrack.hints(puzzle), // TODO
         }
     }
@@ -55,6 +56,7 @@ mod tests {
         assert!(Tactics::Row2 < Tactics::Row3);
         assert!(Tactics::Row3 < Tactics::CountFixed);
         assert!(Tactics::CountFixed < Tactics::CountGuess);
+        assert!(Tactics::CountGuess < Tactics::Uniqueness);
     }
 
     #[test]

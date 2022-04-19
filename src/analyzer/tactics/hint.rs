@@ -1,8 +1,8 @@
 #[derive(Debug, PartialEq, Eq)]
 pub struct Hint {
-    x: usize,
-    y: usize,
-    v: u8, // value of 0 or 1
+    pub x: usize,
+    pub y: usize,
+    pub v: u8, // value of 0 or 1
 }
 
 impl Hint {

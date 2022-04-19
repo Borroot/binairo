@@ -1,5 +1,5 @@
 use crate::puzzle;
-use std::{boxed, convert};
+use strum_macros;
 
 mod count_fixed;
 mod count_guess;
@@ -9,7 +9,17 @@ mod row3;
 pub mod hint;
 
 /// Different tactics that humans apply to binairo puzzles.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    strum_macros::EnumCount,
+    strum_macros::EnumIter,
+)]
 pub enum Tactics {
     Row2,
     Row3,
@@ -75,8 +85,7 @@ mod tests {
         fn tactic_run(tactic: Tactics) {
             let puzzle = puzzle::Puzzle::from_codex("1f01f0", 4, 4).unwrap();
             assert!(
-                tactic.hints(&puzzle)
-                    == vec![hint::Hint::new(0, 1, 0), hint::Hint::new(3, 2, 1)]
+                tactic.hints(&puzzle) == vec![hint::Hint::new(0, 1, 0), hint::Hint::new(3, 2, 1)]
             );
         }
         let tactic = Tactics::Row3;

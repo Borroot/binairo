@@ -1,6 +1,6 @@
-use std::{char, fmt, ops, result};
+use std::{char, fmt, result};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Puzzle(Vec<Vec<Option<u8>>>);
 
 impl Puzzle {
@@ -89,7 +89,7 @@ impl Puzzle {
     }
 }
 
-impl ops::Index<usize> for Puzzle {
+impl std::ops::Index<usize> for Puzzle {
     type Output = Vec<Option<u8>>;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -97,7 +97,7 @@ impl ops::Index<usize> for Puzzle {
     }
 }
 
-impl ops::IndexMut<usize> for Puzzle {
+impl std::ops::IndexMut<usize> for Puzzle {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         return &mut self.0[index];
     }

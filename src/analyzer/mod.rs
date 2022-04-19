@@ -180,4 +180,50 @@ mod tests {
                 }
         );
     }
+
+    #[test]
+    fn stats_middle_hard() {
+        let puzzle = puzzle::Puzzle::from_codex("11dfa1b00fff", 6, 6).unwrap();
+        let tactics = vec![
+            tactics::Tactics::Row2,
+            tactics::Tactics::Row3,
+            tactics::Tactics::CountFixed,
+            tactics::Tactics::CountGuess,
+            tactics::Tactics::Uniqueness,
+        ];
+        assert!(
+            Stats::from(&puzzle, Some(tactics))
+                == Stats {
+                    counters: vec![
+                        Counter {
+                            tactic: tactics::Tactics::Row2,
+                            count: 2,
+                        },
+                        Counter {
+                            tactic: tactics::Tactics::Row3,
+                            count: 4,
+                        },
+                        Counter {
+                            tactic: tactics::Tactics::CountFixed,
+                            count: 1,
+                        },
+                        Counter {
+                            tactic: tactics::Tactics::CountGuess,
+                            count: 2,
+                        },
+                        Counter {
+                            tactic: tactics::Tactics::Uniqueness,
+                            count: 2,
+                        },
+                    ],
+                    unsolved: puzzle.clone(),
+                    solved: puzzle::Puzzle::from_codex(
+                        "110010001b1110100fff",
+                        6,
+                        6
+                    )
+                    .unwrap(),
+                }
+        );
+    }
 }

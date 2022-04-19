@@ -65,6 +65,7 @@ fn eliminate(gen: &mut puzzle::Puzzle, mut rng: &mut rand::rngs::SmallRng) {
 
         // TODO dont run the unique function but just check if there is not
         // other solution than the one we started with (more efficient)
+        // TODO check if it can still be solved pleasantly by a human
         if solver::unique(&gen) != Some(true) {
             gen[y][x] = symbol;
         }

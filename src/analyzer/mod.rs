@@ -3,11 +3,9 @@ use crate::{
     puzzle,
 };
 use std::result;
-use strum::IntoEnumIterator;
 
+pub mod level;
 pub mod tactics;
-
-// TODO create a difficulty measure based on the stats
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Counter {
@@ -23,18 +21,8 @@ pub struct Stats {
 }
 
 impl Stats {
-    // TODO pass tactics as a reference
-    pub fn from(puzzle: &puzzle::Puzzle, tactics: Option<Vec<tactics::Tactics>>) -> Stats {
-        // initialize the list of tactics and sort
-        let mut tactics = if tactics.is_none() || tactics.as_ref().unwrap().len() == 0 {
-            tactics::Tactics::iter().collect()
-        } else {
-            tactics.unwrap()
-        };
-        tactics.sort();
-
-        // solve the puzzle using the given tactics
-        return Self::solve(puzzle, &tactics);
+    pub fn from(puzzle: &puzzle::Puzzle, level: Option<level::Level>) -> Stats {
+        Self::solve(puzzle, &level.unwrap_or(level::Level::Hard).tactics())
     }
 
     fn solve(puzzle: &puzzle::Puzzle, tactics: &Vec<tactics::Tactics>) -> Stats {
@@ -59,7 +47,15 @@ impl Stats {
             if hints.len() == 0 {
                 tactic_index += 1;
             } else {
-                for Hint { x, y, v } in hints {
+                if tactics[tactic_index] <= tactics::Tactics::CountFixed {
+                    // apply all hints if it is a basic tactic
+                    for Hint { x, y, v } in hints {
+                        solved[y][x] = Some(v);
+                        counters[tactic_index].count += 1;
+                    }
+                } else {
+                    // apply only one hint if it is an advanced tactic
+                    let Hint { x, y, v } = hints[0];
                     solved[y][x] = Some(v);
                     counters[tactic_index].count += 1;
                 }
@@ -115,15 +111,16 @@ mod tests {
     #[test]
     fn stats_empty_list() {
         // should not panic due to index out of bounds error
-        Stats::from(&puzzle::Puzzle::new(4, 4).unwrap(), Some(Vec::new()));
+        Stats::from(&puzzle::Puzzle::new(4, 4).unwrap());
     }
 
     #[test]
     fn stats_small_easy() {
         let puzzle = puzzle::Puzzle::from_codex("e11f1b", 4, 4).unwrap();
-        let tactics = vec![tactics::Tactics::Row3, tactics::Tactics::Row2];
+        let tactics = vec![tactics::Tactics::Row2, tactics::Tactics::Row3];
+        println!("{:?}", Stats::solve(&puzzle, &tactics));
         assert!(
-            Stats::from(&puzzle, Some(tactics))
+            Stats::solve(&puzzle, &tactics)
                 == Stats {
                     counters: vec![
                         Counter {
@@ -151,7 +148,7 @@ mod tests {
             tactics::Tactics::CountGuess,
         ];
         assert!(
-            Stats::from(&puzzle, Some(tactics))
+            Stats::solve(&puzzle, &tactics)
                 == Stats {
                     counters: vec![
                         Counter {
@@ -193,7 +190,7 @@ mod tests {
             tactics::Tactics::Uniqueness,
         ];
         assert!(
-            Stats::from(&puzzle, Some(tactics))
+            Stats::solve(&puzzle, &tactics)
                 == Stats {
                     counters: vec![
                         Counter {

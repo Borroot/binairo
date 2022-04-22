@@ -1,5 +1,4 @@
 use crate::puzzle;
-use strum_macros;
 
 mod backtrack;
 mod count_fixed;
@@ -11,17 +10,7 @@ mod uniqueness;
 pub mod hint;
 
 /// Different tactics that humans apply to binairo puzzles.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    strum_macros::EnumCount,
-    strum_macros::EnumIter,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Tactics {
     Row2,
     Row3,

@@ -1,5 +1,5 @@
 use crate::{
-    analyzer::{self, tactics},
+    analyzer::{self, level},
     puzzle, solver,
 };
 use itertools::Itertools;
@@ -10,7 +10,7 @@ use std::result;
 pub fn gen(
     width: usize,
     height: usize,
-    tactics: Option<Vec<tactics::Tactics>>,
+    level: level::Level,
     seed: Option<u64>,
 ) -> result::Result<puzzle::Puzzle, String> {
     // use the seed if given
@@ -24,7 +24,7 @@ pub fn gen(
 
     // generate a puzzle
     let mut gen = init(width, height, &mut rng)?;
-    eliminate(&mut gen, tactics, &mut rng);
+    eliminate(&mut gen, level, &mut rng);
 
     return Ok(gen);
 }
@@ -54,11 +54,7 @@ fn init(
 }
 
 /// Eliminate all the values which are not required for a unique solution.
-fn eliminate(
-    gen: &mut puzzle::Puzzle,
-    tactics: Option<Vec<tactics::Tactics>>,
-    mut rng: &mut rand::rngs::SmallRng,
-) {
+fn eliminate(gen: &mut puzzle::Puzzle, level: level::Level, mut rng: &mut rand::rngs::SmallRng) {
     // shuffle the order in which all the cells are visited
     let mut cells: Vec<_> = (0..gen.height())
         .cartesian_product(0..gen.width())
@@ -70,10 +66,11 @@ fn eliminate(
         let symbol = gen[y][x];
         gen[y][x] = None;
 
-        // TODO dont run the unique function but just check if there is not
-        // other solution than the one we started with (more efficient)
+        // check if the solution is still unique and solvable given the level
         if solver::unique(&gen) != Some(true)
-            || !analyzer::Stats::from(&gen, tactics.clone()).solved.isfull()
+            || !analyzer::Stats::from(&gen, Some(level.clone()))
+                .solved
+                .isfull()
         {
             gen[y][x] = symbol;
         }

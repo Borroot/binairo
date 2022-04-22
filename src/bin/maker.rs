@@ -1,20 +1,16 @@
 use binairo::{
-    analyzer::{self, tactics},
+    analyzer::{self, level},
     generator,
 };
 
 fn main() {
-    let tactics = vec![
-        tactics::Tactics::Row2,
-        tactics::Tactics::Row3,
-        tactics::Tactics::CountFixed,
-        tactics::Tactics::CountGuess,
-        tactics::Tactics::Uniqueness,
-    ];
-    let gen = generator::gen(6, 6, Some(tactics.clone()), None).unwrap();
-    let stats = analyzer::Stats::from(&gen, Some(tactics.clone()));
+    let gen = generator::gen(10, 10, level::Level::Medium, None).unwrap();
+    let stats = analyzer::Stats::from(&gen, None);
+    let level = analyzer::level::Level::from(&gen);
 
     println!("{}", gen);
     println!("{}", stats.solved);
     println!("{:?}", stats.counters);
+    println!("{:?}", level);
+    println!("{}", gen.codex());
 }

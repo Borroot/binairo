@@ -11,6 +11,7 @@ fn main() {
         tactics::Tactics::CountFixed,
         tactics::Tactics::CountGuess,
         tactics::Tactics::Uniqueness,
+        tactics::Tactics::Backtrack,
     ];
 
     for tactic in tactics {

@@ -4,7 +4,7 @@ use binairo::{
 };
 
 fn main() {
-    let gen = generator::gen(10, 10, level::Level::Hard, None).unwrap();
+    let gen = generator::gen(10, 10, level::Level::Medium, None).unwrap();
     let stats = analyzer::Stats::from(&gen);
 
     println!("{}", gen);

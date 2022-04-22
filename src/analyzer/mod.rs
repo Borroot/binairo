@@ -59,6 +59,7 @@ impl Stats {
                     }
                 } else {
                     // apply only one hint if it is an advanced tactic
+                    // TODO apply the best hint
                     let Hint { x, y, v } = hints[0];
                     solved[y][x] = Some(v);
                     counters[tactic_index].count += 1;

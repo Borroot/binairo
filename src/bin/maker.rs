@@ -1,4 +1,7 @@
-use binairo::{analyzer::{self, tactics}, generator};
+use binairo::{
+    analyzer::{self, tactics},
+    generator,
+};
 
 fn main() {
     let tactics = vec![
@@ -14,5 +17,4 @@ fn main() {
     println!("{}", gen);
     println!("{}", stats.solved);
     println!("{:?}", stats.counters);
-
 }

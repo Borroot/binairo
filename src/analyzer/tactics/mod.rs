@@ -1,6 +1,7 @@
 use crate::puzzle;
 use strum_macros;
 
+mod backtrack;
 mod count_fixed;
 mod count_guess;
 mod row2;
@@ -27,7 +28,7 @@ pub enum Tactics {
     CountFixed,
     CountGuess,
     Uniqueness,
-    // Backtrack,  // TODO
+    Backtrack,
 }
 
 pub trait Tactic {
@@ -42,7 +43,7 @@ impl Tactic for Tactics {
             Tactics::CountFixed => count_fixed::CountFixed.hints(puzzle),
             Tactics::CountGuess => count_guess::CountGuess.hints(puzzle),
             Tactics::Uniqueness => uniqueness::Uniqueness.hints(puzzle),
-            // Tactics::Backtrack => backtrack::Backtrack.hints(puzzle), // TODO
+            Tactics::Backtrack => backtrack::Backtrack.hints(puzzle),
         }
     }
 }
@@ -57,6 +58,7 @@ mod tests {
         assert!(Tactics::Row3 < Tactics::CountFixed);
         assert!(Tactics::CountFixed < Tactics::CountGuess);
         assert!(Tactics::CountGuess < Tactics::Uniqueness);
+        assert!(Tactics::Uniqueness < Tactics::Backtrack);
     }
 
     #[test]

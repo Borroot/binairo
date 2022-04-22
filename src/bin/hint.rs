@@ -1,4 +1,7 @@
-use binairo::{analyzer::tactics::{self, Tactic}, puzzle};
+use binairo::{
+    analyzer::tactics::{self, Tactic},
+    puzzle,
+};
 
 fn main() {
     let puzzle = puzzle::Puzzle::from_codex("a1b01a1b10a0b01101010", 6, 4).unwrap();

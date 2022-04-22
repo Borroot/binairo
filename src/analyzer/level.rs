@@ -13,11 +13,10 @@ pub enum Level {
 
 impl Level {
     pub fn from(puzzle: &puzzle::Puzzle) -> Self {
-        // assume the level is hard so all tactics will be used
-        let stats = analyzer::Stats::from(puzzle, Some(Level::Hard));
+        let stats = analyzer::Stats::from(puzzle);
 
         if stats.count(tactics::Tactics::Backtrack).unwrap() > 3 {
-            return Level::Hard;
+            return Level::Inhuman;
         }
 
         if stats.count(tactics::Tactics::Backtrack).unwrap() > 0 {

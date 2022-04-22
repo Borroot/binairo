@@ -21,8 +21,12 @@ pub struct Stats {
 }
 
 impl Stats {
-    pub fn from(puzzle: &puzzle::Puzzle, level: Option<level::Level>) -> Stats {
-        Self::solve(puzzle, &level.unwrap_or(level::Level::Hard).tactics())
+    pub fn from_level(puzzle: &puzzle::Puzzle, level: level::Level) -> Stats {
+        Self::solve(puzzle, &level.tactics())
+    }
+
+    pub fn from(puzzle: &puzzle::Puzzle) -> Stats {
+        Self::solve(puzzle, &level::Level::Inhuman.tactics())
     }
 
     fn solve(puzzle: &puzzle::Puzzle, tactics: &Vec<tactics::Tactics>) -> Stats {
@@ -111,7 +115,7 @@ mod tests {
     #[test]
     fn stats_empty_list() {
         // should not panic due to index out of bounds error
-        Stats::from(&puzzle::Puzzle::new(4, 4).unwrap(), None);
+        Stats::from(&puzzle::Puzzle::new(4, 4).unwrap());
     }
 
     #[test]

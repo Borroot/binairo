@@ -1,7 +1,4 @@
-use crate::{
-    analyzer::{self, level},
-    puzzle, solver,
-};
+use crate::{analyzer::level, puzzle, solver};
 use itertools::Itertools;
 use rand::{self, seq::SliceRandom, Rng, SeedableRng};
 use std::result;
@@ -66,12 +63,8 @@ fn eliminate(gen: &mut puzzle::Puzzle, level: level::Level, mut rng: &mut rand::
         let symbol = gen[y][x];
         gen[y][x] = None;
 
-        // check if the solution is still unique and solvable given the level
-        if solver::unique(&gen) != Some(true)
-            || !analyzer::Stats::from(&gen, Some(level.clone()))
-                .solved
-                .isfull()
-        {
+        // check if the solution is still unique and the appropriate level
+        if solver::unique(&gen) != Some(true) || level::Level::from(&gen) > level {
             gen[y][x] = symbol;
         }
     }

@@ -1,4 +1,3 @@
-// TODO implement using solver
 use crate::analyzer::tactics::{hint, Tactic};
 use crate::puzzle;
 use crate::solver;

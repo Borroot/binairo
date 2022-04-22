@@ -111,7 +111,7 @@ mod tests {
     #[test]
     fn stats_empty_list() {
         // should not panic due to index out of bounds error
-        Stats::from(&puzzle::Puzzle::new(4, 4).unwrap());
+        Stats::from(&puzzle::Puzzle::new(4, 4).unwrap(), None);
     }
 
     #[test]
@@ -195,11 +195,11 @@ mod tests {
                     counters: vec![
                         Counter {
                             tactic: tactics::Tactics::Row2,
-                            count: 2,
+                            count: 3,
                         },
                         Counter {
                             tactic: tactics::Tactics::Row3,
-                            count: 4,
+                            count: 5,
                         },
                         Counter {
                             tactic: tactics::Tactics::CountFixed,
@@ -207,11 +207,11 @@ mod tests {
                         },
                         Counter {
                             tactic: tactics::Tactics::CountGuess,
-                            count: 2,
+                            count: 1,
                         },
                         Counter {
                             tactic: tactics::Tactics::Uniqueness,
-                            count: 2,
+                            count: 1,
                         },
                     ],
                     unsolved: puzzle.clone(),

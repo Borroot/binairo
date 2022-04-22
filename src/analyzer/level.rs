@@ -8,6 +8,7 @@ pub enum Level {
     Easy,
     Medium,
     Hard,
+    Inhuman,
 }
 
 impl Level {
@@ -15,14 +16,20 @@ impl Level {
         // assume the level is hard so all tactics will be used
         let stats = analyzer::Stats::from(puzzle, Some(Level::Hard));
 
+        if stats.count(tactics::Tactics::Backtrack).unwrap() > 3 {
+            return Level::Hard;
+        }
+
         if stats.count(tactics::Tactics::Backtrack).unwrap() > 0 {
             return Level::Hard;
         }
+
         if stats.count(tactics::Tactics::Uniqueness).unwrap() > 0
             || stats.count(tactics::Tactics::CountGuess).unwrap() > 0
         {
             return Level::Medium;
         }
+
         return Level::Easy;
     }
 
@@ -36,7 +43,7 @@ impl Level {
             tactics.push(tactics::Tactics::CountGuess);
             tactics.push(tactics::Tactics::Uniqueness);
         }
-        if *self == Level::Hard {
+        if *self >= Level::Hard {
             tactics.push(tactics::Tactics::Backtrack);
         }
         return tactics;
@@ -52,6 +59,7 @@ mod tests {
         assert!(Level::Easy < Level::Medium);
         assert!(Level::Easy < Level::Hard);
         assert!(Level::Medium < Level::Hard);
+        assert!(Level::Hard < Level::Inhuman);
     }
 
     #[test]
@@ -78,6 +86,18 @@ mod tests {
 
         assert!(
             Level::Hard.tactics()
+                == vec![
+                    tactics::Tactics::Row2,
+                    tactics::Tactics::Row3,
+                    tactics::Tactics::CountFixed,
+                    tactics::Tactics::CountGuess,
+                    tactics::Tactics::Uniqueness,
+                    tactics::Tactics::Backtrack,
+                ]
+        );
+
+        assert!(
+            Level::Inhuman.tactics()
                 == vec![
                     tactics::Tactics::Row2,
                     tactics::Tactics::Row3,

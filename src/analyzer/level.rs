@@ -15,7 +15,7 @@ impl Level {
     pub fn from(puzzle: &puzzle::Puzzle) -> Self {
         let stats = analyzer::Stats::from(puzzle);
 
-        if stats.count(tactics::Tactics::Backtrack).unwrap() > 3 {
+        if stats.count(tactics::Tactics::Backtrack).unwrap() > 1 {
             return Level::Inhuman;
         }
 
